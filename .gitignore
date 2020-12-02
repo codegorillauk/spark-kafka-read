@@ -1,0 +1,111 @@
+# Created by .ignore support plugin (hsz.mobi)
+### SBT template
+# Simple Build Tool
+# http://www.scala-sbt.org/release/docs/Getting-Started/Directories.html#configuring-version-control
+
+target/
+lib_managed/
+src_managed/
+project/boot/
+.bsp/
+.history
+.cache
+.orig
+
+### JetBrains template
+# Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion
+
+## Directory-based project format:
+.idea/
+# if you remove the above rule, at least ignore the following:
+
+# User-specific stuff:
+# .idea/workspace.xml
+# .idea/tasks.xml
+# .idea/dictionaries
+
+# Sensitive or high-churn files:
+# .idea/dataSources.ids
+# .idea/dataSources.xml
+# .idea/sqlDataSources.xml
+# .idea/dynamic.xml
+# .idea/uiDesigner.xml
+
+# Gradle:
+# .idea/gradle.xml
+# .idea/libraries
+
+# Mongo Explorer plugin:
+# .idea/mongoSettings.xml
+
+# IntelliJ
+/out/
+
+# mpeltonen/sbt-idea plugin
+.idea_modules/
+
+# JIRA plugin
+atlassian-ide-plugin.xml
+
+# Crashlytics plugin (for Android Studio and IntelliJ)
+com_crashlytics_export_strings.xml
+crashlytics.properties
+crashlytics-build.properties
+
+# sbt specific
+.cache
+.history
+.lib/
+dist/
+target/
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
+
+# Scala-IDE specific
+.scala_dependencies
+.worksheet
+
+# UI workflow specific
+node_modules
+bower_components
+coverage
+.tmp
+.karma/
+
+# Linux specific
+.DS_Store
+.un~
+
+syntax: glob
+
+# Log files
+*.log
+
+# Compiled python files
+*.pyc
+
+# Visual Studio Code settings
+jsconfig.json
+.settings/*
+typings/*
+.vscode/*
+
+# Key file
+sharedkeys.pub
+
+# RPMS
+*.rpm
+
+#offline deployment
+VisionUnReleased-DONOTUSE/
+
+#tars
+*.tar.gz
+*.tar.gz.md5
+
+# VSCode junk
+.metals
+.bloop
+.scalafmt.conf
