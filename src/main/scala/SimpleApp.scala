@@ -1,5 +1,5 @@
 /* SimpleApp.scala */
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{SaveMode, SparkSession}
 import scopt.{OParser, OParserBuilder}
 import org.apache.spark.sql.functions._
 
@@ -11,10 +11,11 @@ The input lines from kafka are of the form:
  */
 
 object SimpleApp {
-  case class Config( memory: String = "16g",
-                     cores: String = "10",
-                     topic: String = "kafka_array_of_things",
-                     brokers: String = "posh:9092,scary:9092,sporty:9092,ginger:9092,baby:9092"
+  case class Config(memory: String = "16g",
+                    cores: String = "10",
+                    inTopic: String = "sample_in",
+                    outTopic: String = "sample_out",
+                    brokers: String = "posh:9092,scary:9092,sporty:9092,ginger:9092,baby:9092"
                    )
 
   val builder: OParserBuilder[Config] = OParser.builder[Config]
@@ -28,9 +29,12 @@ object SimpleApp {
       opt[String]('c', "cores")
         .action((x, c) => c.copy(cores = x))
         .text("max cores in total, should equal topic partitions"),
-      opt[String]('t', "topic")
-        .action((x, c) => c.copy(topic = x))
+      opt[String]('i', "in")
+        .action((x, c) => c.copy(inTopic = x))
         .text("which kafka topic to read from"),
+      opt[String]('o', "out")
+        .action((x, c) => c.copy(outTopic = x))
+        .text("which kafka topic to write to"),
       opt[String]('b', "brokers")
         .action((x, c) => c.copy(brokers = x))
         .text("the kafka brokers")
@@ -53,6 +57,7 @@ object SimpleApp {
       SparkSession.builder.appName("Kafka Read Performance")
         .config("spark.executor.memory",config.memory)
         .config("spark.cores.max",config.cores)
+        .config("spark.sql.sources.useV1SourceList","avro,csv,json,orc,parquet,text") // by not including kafka, we use the v2 version of the source
         .getOrCreate()
 
     import spark.implicits._
@@ -62,7 +67,7 @@ object SimpleApp {
       .read
       .format("kafka")
       .option("kafka.bootstrap.servers", config.brokers)
-      .option("subscribe", config.topic)
+      .option("subscribe", config.inTopic)
       .option("startingOffsets", "earliest")
       .option("endingOffsets", "latest")
       .option("failOnDataLoss","false")
@@ -74,23 +79,25 @@ object SimpleApp {
     // as the kafka key is not useful
 
     val startTime = System.nanoTime()
-    val result =
-      df.selectExpr("left(CAST(value AS STRING), 13) as ts", "right(CAST(value AS STRING), 13) as therest")
-      .as[(String,String)]
-      .groupByKey(_._1)
-      .count()
-      .collect()
+//    val input =
+//      df.selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)")
+//        .as[(String, String)]
 
+
+    df
+        .write
+        .format("kafka")
+        .option("kafka.bootstrap.servers", config.brokers)
+        .option("topic", config.outTopic)
+        .mode(SaveMode.Append)
+        .save()
     val endTime = System.nanoTime()
-
-    val totalGroups = result.length
-    val totalRows = result.map(_._2).sum
 
     val elapsedSecs =  (endTime - startTime) / 1E9
 
-    val rowRate = totalRows / elapsedSecs
+    // static input sample was used, fixed row count.
 
-    println(s"Took $elapsedSecs secs to do $totalRows rows for $totalGroups groups - row rate = $rowRate rows per sec")
+    println(s"Took $elapsedSecs secs")
     spark.stop()
   }
 }
